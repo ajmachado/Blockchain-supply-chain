@@ -1,6 +1,6 @@
-###Farm to Table Supply Chain using Ethereum Blockchain
+### Farm to Table Supply Chain using Ethereum Blockchain
 
-###General Project Information
+### General Project Information
 
 This is a supply chain project which checks the authenticity of organic vegetables from farm to table. It is developed as a blockchain project on the Ethereum blockchain.
 
