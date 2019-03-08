@@ -1,6 +1,6 @@
-### Farm to Table Supply Chain using Ethereum Blockchain
+# Farm to Table Supply Chain using Ethereum Blockchain
 
-### General Project Information
+## General Project Information
 
 This is a supply chain project which checks the authenticity of organic vegetables from farm to table. It is developed as a blockchain project on the Ethereum blockchain.
 
@@ -31,8 +31,6 @@ npm install truffle-hdwallet-provider --save
 ```
 
 To deploy and test on local ganache cli
-- To Install the project clone the repository.
-- Perform npm install to install the project dependencies
 - Run truffle develop
 - Run compile to compile the project
 - Run migrate --reset to migrate the project to local network. 
@@ -51,7 +49,7 @@ To test frontend using localhost and Metamask
 
 
 
-# Libraries Used
+## Libraries Used
 
 Truffle-hdwallet-provider : To set the provider to connect to the Rinkeby Network
 
@@ -59,7 +57,7 @@ https://unpkg.com/ipfs/dist/index.min.js : To reference to the IPFS Api.
 
 
 
-# Rinkeby Deployment Information
+## Rinkeby Deployment Information
 
 Supplychain Tx Hash: 0xc5840331f0e9db1476b3ad47d6b0a1512f9c8b5188452ec5407606ab624dcb05
 
@@ -70,7 +68,7 @@ Supplychain Contract Address:
 0xdD3eb13F2D2880fCEc8675171F6153095e22eCb4
 
 
-# IPFS for storing image files
+## IPFS for storing image files
 
 Since storing large files on the Ethereum network can be very expensive, they can be stored in the IPFS and the hash created can be store on the blockchain.
 
