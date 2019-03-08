@@ -1,3 +1,4 @@
+
 App = {
     web3Provider: null,
     contracts: {},
@@ -17,7 +18,10 @@ App = {
     distributorID: "0x0000000000000000000000000000000000000000",
     retailerID: "0x0000000000000000000000000000000000000000",
     consumerID: "0x0000000000000000000000000000000000000000",
-
+    imageHash: "",
+    fileBuffer: "",
+    fileName: "",
+    
     init: async function () {
         App.readForm();
         /// Setup access to blockchain
@@ -39,7 +43,7 @@ App = {
         App.distributorID = $("#distributorID").val();
         App.retailerID = $("#retailerID").val();
         App.consumerID = $("#consumerID").val();
-
+        
         console.log(
             App.sku,
             App.upc,
@@ -122,15 +126,30 @@ App = {
 
     bindEvents: function() {
         $(document).on('click', App.handleButtonClick);
+        $(document).on('change', App.handleChangeEvent);
     },
 
-    handleButtonClick: async function(event) {
+    handleChangeEvent: async function(event) {
         event.preventDefault();
 
         App.getMetaskAccountID();
 
         var processId = parseInt($(event.target).data('id'));
         console.log('processId',processId);
+
+        if (processId == 13) {
+            return await App.captureFile(event);
+        }
+    },
+
+    handleButtonClick: async function(event) {
+        var processId = parseInt($(event.target).data('id'));
+        console.log('processId',processId);
+
+        if (processId != 13){
+        event.preventDefault();
+
+        App.getMetaskAccountID();
 
         switch(processId) {
             case 1:
@@ -169,6 +188,12 @@ App = {
             case 12:
                 return await App.fetchItemBufferTwo(event);
                 break;
+            case 13:
+                break;
+            case 14:
+                return await App.uploadFile(event);
+                break;
+        }
         }
     },
 
@@ -320,7 +345,7 @@ App = {
         console.log('upc',App.upc);
 
         App.contracts.SupplyChain.deployed().then(function(instance) {
-          return instance.fetchItemBufferOne(App.productID);
+          return instance.fetchItemBufferOne(App.productID, {from: App.metamaskAccountID});
         }).then(function(result) {
           $("#ftc-item").text(result);
           console.log('fetchItemBufferOne', result);
@@ -331,7 +356,7 @@ App = {
 
     fetchItemBufferTwo: function () {
         App.contracts.SupplyChain.deployed().then(function(instance) {
-          return instance.fetchItemBufferTwo.call(App.productID);
+          return instance.fetchItemBufferTwo.call(App.productID, {from: App.metamaskAccountID});
         }).then(function(result) {
           $("#ftc-item").text(result);
           console.log('fetchItemBufferTwo', result);
@@ -359,6 +384,53 @@ App = {
           console.log(err.message);
         });
         
+    },
+
+    //Take file input from user
+    captureFile: function (event) {
+        event.stopPropagation()
+        event.preventDefault()
+        
+        App.fileName = event.target.files[0]      
+        
+    },
+
+    uploadFile: async function(event){
+        event.preventDefault();
+                
+        const reader = new FileReader();
+        reader.readAsBinaryString(App.fileName)
+        reader.onloadend = async function() {
+            //const buf = Buffer.Buffer(reader.result) // Convert data into buffer
+            
+            try{
+                const ipfs = new Ipfs({ host: 'ipfs.infura.io', port: 5001, protocol: 'https' }) // Connect to IPFS
+                ipfs.on('ready', () => {
+                    const files = [
+                        {
+                            path: 'image.jpg',
+                            content: ipfs.types.Buffer.from(btoa(reader.result),"base64")
+                        }
+                    ] 
+                    ipfs.add(files, function (err, files) {
+                        App.imageHash = "https://ipfs.io/ipfs/"+files[0].hash;
+                        console.log(App.imageHash)
+                        imageElement = `<img id="image" height=200px width=200px src=${App.imageHash}/>`;
+                        document.getElementById("imageDiv").insertAdjacentHTML('beforeend', imageElement);
+                        App.contracts.SupplyChain.deployed().then(function(instance) {
+                            return instance.upload(App.productID, App.imageHash, {from: App.metamaskAccountID});
+                        }).then(function(result) {
+                            $("#ftc-item").text(result);
+                            console.log('Upload Image',result);
+                        }).catch(function(err) {
+                            console.log(err.message);
+                        });
+                    })
+                })
+            } catch(err){
+                console.log('ipfs issue' + err);
+            }
+        }
     }
 };
 
