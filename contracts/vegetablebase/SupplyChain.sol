@@ -167,8 +167,7 @@ contract SupplyChain is FarmerRole, DistributorRole, ConsumerRole, RetailerRole,
   }
 
   // In the constructor set 'owner' to the address that instantiated the contract
-  // and set 'sku' to 1
-  // and set 'upc' to 1
+  // and set 'sku', 'upc' and 'productId' to 1
   constructor() public payable {
     sc_owner = msg.sender;
     sku = 1;
@@ -194,9 +193,9 @@ contract SupplyChain is FarmerRole, DistributorRole, ConsumerRole, RetailerRole,
       string memory _originFarmLongitude, 
       string memory _productNotes
       ) 
+      public 
       verifyCaller(_originFarmerID)
       onlyFarmer
-      public 
   {
     //Add Item
     items[productId] = Item({
@@ -229,10 +228,10 @@ contract SupplyChain is FarmerRole, DistributorRole, ConsumerRole, RetailerRole,
 
   // Define a function 'growItem' that allows a farmer to mark an item 'Grown'
   function growItem(uint _productId) 
+    public 
     verifyCaller(items[_productId].originFarmerID) 
     planted(_productId) 
     onlyFarmer
-    public 
   {
     // Add the new item as part of Grown
     items[_productId].itemState = State.Grown;
@@ -243,10 +242,10 @@ contract SupplyChain is FarmerRole, DistributorRole, ConsumerRole, RetailerRole,
 
   // Define a function 'harvestItem' that allows a farmer to mark an item 'Harvested'
   function harvestItem(uint _productId) 
+    public 
     verifyCaller(items[_productId].originFarmerID) 
     grown(_productId) 
     onlyFarmer
-    public 
   {
     // Add the new item as part of Harvest
     items[_productId].itemState = State.Harvested;
@@ -257,10 +256,10 @@ contract SupplyChain is FarmerRole, DistributorRole, ConsumerRole, RetailerRole,
 
   // Define a function 'processtItem' that allows a farmer to mark an item 'Processed'
   function processItem(uint _productId) 
+    public 
     verifyCaller(items[_productId].originFarmerID) 
     harvested(_productId) 
     onlyFarmer
-    public 
   {
     // Update the appropriate fields
     items[_productId].itemState = State.Processed;
@@ -271,10 +270,10 @@ contract SupplyChain is FarmerRole, DistributorRole, ConsumerRole, RetailerRole,
 
   // Define a function 'packItem' that allows a farmer to mark an item 'Packed'
   function packageItem(uint _productId) 
+    public 
     verifyCaller(items[_productId].originFarmerID) 
     processed(_productId) 
     onlyFarmer
-    public 
   {
     // Update the appropriate fields
     items[_productId].itemState = State.Packaged;
@@ -285,10 +284,10 @@ contract SupplyChain is FarmerRole, DistributorRole, ConsumerRole, RetailerRole,
 
   // Define a function 'sellItem' that allows a farmer to mark an item 'ForSale'
   function sellItem(uint _productId, uint _price) 
+    public 
     verifyCaller(items[_productId].originFarmerID) 
     packaged(_productId) 
     onlyFarmer
-    public 
   {
     // Update the appropriate fields
     items[_productId].itemState = State.ForSale;
@@ -300,8 +299,8 @@ contract SupplyChain is FarmerRole, DistributorRole, ConsumerRole, RetailerRole,
 
   // Define a function 'upload' that allows a farmer to upload product image
   function upload(uint _productId, string memory _image) 
-    onlyFarmer
     public 
+    onlyFarmer
   {
     // Update the appropriate fields
     items[_productId].productImage = _image;
@@ -314,12 +313,12 @@ contract SupplyChain is FarmerRole, DistributorRole, ConsumerRole, RetailerRole,
   // Use the above defined modifiers to check if the item is available for sale, if the buyer has paid enough, 
   // and any excess ether sent is refunded back to the buyer
   function buyItem(uint _productId) 
+    public 
+    payable 
     forSale(_productId) 
     paidEnough(items[_productId].productPrice) 
     checkValue(_productId) 
     onlyDistributor
-    public 
-    payable 
   {
     // Update the appropriate fields - ownerID, distributorID, itemState
     items[_productId].itemState = State.Sold;
@@ -337,10 +336,10 @@ contract SupplyChain is FarmerRole, DistributorRole, ConsumerRole, RetailerRole,
   // Define a function 'shipItem' that allows the distributor to mark an item 'Shipped'
   // Use the above modifiers to check if the item is sold
   function shipItem(uint _productId) 
+    public 
     sold(_productId) 
     verifyCaller(items[_productId].distributorID)
-    onlyDistributor 
-    public 
+    onlyDistributor
   {
     // Update the appropriate fields
     items[_productId].itemState = State.Shipped;
@@ -353,9 +352,9 @@ contract SupplyChain is FarmerRole, DistributorRole, ConsumerRole, RetailerRole,
   // Define a function 'receiveItem' that allows the retailer to mark an item 'Received'
   // Use the above modifiers to check if the item is shipped
   function receiveItem(uint _productId) 
+    public 
     shipped(_productId) 
     onlyRetailer
-    public 
   {
     // Update the appropriate fields - ownerID, retailerID, itemState
     items[_productId].itemState = State.Received;
@@ -369,9 +368,9 @@ contract SupplyChain is FarmerRole, DistributorRole, ConsumerRole, RetailerRole,
   // Define a function 'purchaseItem' that allows the consumer to mark an item 'Purchased'
   // Use the above modifiers to check if the item is received
   function purchaseItem(uint _productId) 
+    public 
     received(_productId) 
     onlyConsumer
-    public 
   {
     // Update the appropriate fields - ownerID, consumerID, itemState
     items[_productId].itemState = State.Purchased;
